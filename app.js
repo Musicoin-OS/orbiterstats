@@ -3,9 +3,19 @@ var path = require('path');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
+var fs = require('fs');
 var bodyParser = require('body-parser');
 
 var routes = require('./routes/index');
+
+var http = require('http');
+var https = require('https');
+var privateKey = fs.readFileSync('/path/privkey.pem', 'utf8');
+var certificate = fs.readFileSync('/path/cert.pem', 'utf8');
+var credentials = {
+      key: privateKey,
+      cert: certificate
+};
 
 var app = express();
 
@@ -56,10 +66,10 @@ app.use(function(err, req, res, next) {
   });
 });
 
-var port = process.env.PORT || 80;
+var httpServer = http.createServer(app);
+var httpsServer = https.createServer(credentials, app);
 
-app.listen(port, function() {
-  console.log('App started on port: ' + port);
-});
+httpServer.listen(80);
+httpsServer.listen(443);
 
 module.exports = app;
